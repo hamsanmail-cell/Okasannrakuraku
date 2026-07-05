@@ -504,4 +504,79 @@
             .catch(function(err) {
                 console.error("カメラの起動に失敗しました: ", err);
                 alert("カメラを起動できませんでした。ブラウザのカメラ許可設定を確認してください。");
-                document
+                document.getElementById('camera-scan-area').style.display = "none";
+            });
+    }
+
+    // カメラの映像コマを常時監視してQRコードを解析する処理
+    function tickScan() {
+        if (videoElement && videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+            canvasElement.height = videoElement.videoHeight;
+            canvasElement.width = videoElement.videoWidth;
+            canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            
+            // 現在の画面コマを画像データとして切り出してjsQRに解析させる
+            const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+            });
+
+            // QRコードが見つかった場合
+            if (code) {
+                const qrText = code.data;
+                // このアプリで作ったQRコードかチェック
+                if (qrText.startsWith("okasan-app-user:")) {
+                    const matchedName = qrText.replace("okasan-app-user:", "");
+                    stopCamera();
+                    addFriendDirect(matchedName);
+                    return; // ループを抜ける
+                }
+            }
+        }
+        // QRコードが見つからなければ次のコマを解析
+        if (localStream) {
+            scanAnimationId = requestAnimationFrame(tickScan);
+        }
+    }
+
+    // 本物のカメラストリームを完全に停止させるクリーンアップ処理
+    function stopCamera() {
+        if (scanAnimationId) {
+            cancelAnimationFrame(scanAnimationId);
+            scanAnimationId = null;
+        }
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+        if (videoElement) {
+            videoElement.srcObject = null;
+        }
+    }
+
+    // 解析成功時に友達リストへ追加する処理
+    function addFriendDirect(newFriendName) {
+        document.getElementById('camera-scan-area').style.display = "none";
+        if (!friendList.includes(newFriendName)) {
+            friendList.push(newFriendName);
+        }
+        updateFriendListUI();
+        document.getElementById('success-friend-name').innerText = newFriendName;
+        document.getElementById('success-display-area').style.display = "block";
+    }
+
+    // テスト用の疑似ボタン処理（相手が読み取った場合）
+    function simulatePartnerScanned() {
+        document.getElementById('qr-display-area').style.display = "none";
+        const partnerName = "妹"; 
+        if (!friendList.includes(partnerName)) {
+            friendList.push(partnerName);
+        }
+        updateFriendListUI();
+        document.getElementById('success-friend-name').innerText = partnerName;
+        document.getElementById('success-display-area').style.display = "block";
+    }
+</script>
+
+</body>
+</html>
