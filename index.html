@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お母さんラクラク アプリ 画面クリーンアップ版</title>
+    <title>お母さんラクラク アプリ 水色版</title>
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -12,7 +12,8 @@
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             line-height: 1.6;
             color: #333333;
-            background-color: #fcf8f2;
+            /* 背景を淡い水色系に調整 */
+            background-color: #f2f8fc;
             margin: 0;
             padding: 0;
         }
@@ -22,7 +23,8 @@
             padding: 20px;
         }
         header {
-            background-color: #ff8e91;
+            /* ヘッダーを爽やかな水色に変更 */
+            background-color: #64b5f6;
             color: white;
             padding: 15px;
             text-align: center;
@@ -46,7 +48,8 @@
             min-height: 520px;
         }
         .phone-header {
-            background-color: #ff8e91;
+            /* アプリ内のヘッダーも水色に統一 */
+            background-color: #64b5f6;
             color: white;
             padding: 12px;
             text-align: center;
@@ -59,7 +62,8 @@
             right: 10px;
             top: 8px;
             background-color: white;
-            color: #ff8e91;
+            /* 文字色を水色に */
+            color: #64b5f6;
             border: none;
             padding: 4px 8px;
             border-radius: 12px;
@@ -103,7 +107,8 @@
             font-size: 14px;
         }
         .primary-btn {
-            background-color: #ff8e91;
+            /* メインのボタンも鮮やかな水色に変更 */
+            background-color: #64b5f6;
             color: white;
             border: none;
             width: 100%;
@@ -149,16 +154,17 @@
             align-items: center;
         }
         .friend-item:hover {
-            background-color: #fff0f1;
+            /* ホバー時の色を薄い水色に */
+            background-color: #e3f2fd;
         }
         .friend-item::after {
             content: "💬 送信する";
             font-size: 10px;
-            color: #ff8e91;
+            color: #64b5f6;
             background: white;
             padding: 2px 6px;
             border-radius: 10px;
-            border: 1px solid #ff8e91;
+            border: 1px solid #64b5f6;
         }
 
         /* 友達ゼロの時のメッセージ */
@@ -253,8 +259,9 @@
                 <button class="right-btn" onclick="toggleFriendSection()">友達</button>
             </div>
             <div class="phone-body">
-                <div id="friend-section" style="display:none; margin-top:20px; border-top:2px dashed #ff8e91; padding-top:15px;">
-                    <span style="font-weight:bold; color:#d15b5f; font-size:13px;">【友達リスト】</span>
+
+                <div id="friend-section" style="display:none; margin-top:20px; border-top:2px dashed #64b5f6; padding-top:15px;">
+                    <span style="font-weight:bold; color:#1e88e5; font-size:13px;">【友達リスト】</span>
                     <p style="font-size:11px; color:#666; margin: 0 0 10px 0;">名前を押すとメッセージ送信欄が開きます</p>
                     
                     <div id="friend-list-box"></div>
