@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お母さんラクラク アプリ スプレッドシート通信版(修正版)</title>
+    <title>お母さんラクラク アプリ スプレッドシート通信版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
@@ -33,7 +33,6 @@
         .dynamic-chat-container { background-color: #eaeaea; border-radius: 12px; padding: 12px; margin-top: 15px; border: 1px solid #ccc; }
         .chat-history { max-height: 150px; overflow-y: auto; background: white; border-radius: 6px; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; }
         
-        /* 吹き出しの左右分け */
         .chat-row { display: flex; margin-bottom: 6px; width: 100%; }
         .chat-row.me { justify-content: flex-end; }
         .chat-row.partner { justify-content: flex-start; }
@@ -113,7 +112,7 @@
 </div>
 
 <script>
-    // 🔴【重要】ここにスプレッドシート(GAS)の「ウェブアプリURL」を貼り付けてください！
+    // 🔴ここにスプレッドシートの「ウェブアプリURL」を貼り付けてください！
     const GAS_URL = "https://script.google.com/macros/s/AKfycbx3Zf0t_A5A7s_MV2O2rWkNu2NUEZjpfjSWUX9lh4iV7bag5LruqolicVqLulz28_UdBw/exec";
 
     let registeredName = "";
