@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お母さんラクラク アプリ メッセージ保存版</title>
-    <!-- 【QRコード作成用ライブラリ】 -->
+    <title>お母さんラクラク アプリ QR何でも読み取り版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- 【本物のカメラからQRを読み取るためのライブラリ】 -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         *, *::before, *::after {
@@ -232,7 +230,7 @@
             border: 1px solid #c8e6c9;
         }
 
-        /* 【メッセージ履歴と送信枠】 */
+        /* メッセージ履歴と送信枠 */
         .dynamic-chat-container {
             background-color: #eaeaea;
             border-radius: 12px;
@@ -258,7 +256,7 @@
             width: fit-content;
             max-width: 90%;
             word-break: break-all;
-            margin-left: auto; /* 右寄せ（送信メッセージ） */
+            margin-left: auto;
         }
         .chat-no-message {
             font-size: 11px;
@@ -284,7 +282,6 @@
 
     <div class="phone-mockup">
         
-        <!-- 【画面1】初期登録画面 -->
         <div id="screen-register" class="app-screen active">
             <div class="phone-header">お母さんラクラク</div>
             <div class="phone-body">
@@ -295,7 +292,6 @@
             </div>
         </div>
 
-        <!-- 【画面2】メインホーム画面 -->
         <div id="screen-main" class="app-screen">
             <div class="phone-header">
                 ホーム
@@ -303,20 +299,16 @@
             </div>
             <div class="phone-body">
 
-                <!-- 記憶消去ボタン -->
                 <div style="text-align: right; margin-bottom: 10px;">
                     <button onclick="clearAllData()" style="font-size: 10px; background: none; border: none; color: #aaa; cursor: pointer; text-decoration: underline;">アプリを初期化する</button>
                 </div>
 
-                <!-- 友達セクション -->
                 <div id="friend-section" style="display:none; margin-top:10px; border-top:2px dashed #64b5f6; padding-top:15px;">
                     <span style="font-weight:bold; color:#1e88e5; font-size:13px;">【友達リスト】</span>
                     <p style="font-size:11px; color:#666; margin: 0 0 10px 0;">名前を押すとメッセージ履歴と送信欄が開きます</p>
                     
-                    <!-- 友達リスト表示エリア -->
                     <div id="friend-list-box"></div>
 
-                    <!-- メッセージ履歴と送信欄の置き場 -->
                     <div id="dynamic-chat-placement"></div>
 
                     <div style="margin-top:20px;">
@@ -326,7 +318,6 @@
             </div>
         </div>
 
-        <!-- 【画面3】新規登録（友達追加）選択画面 -->
         <div id="screen-add-friend" class="app-screen">
             <div class="phone-header">
                 新規登録（友達追加）
@@ -336,15 +327,13 @@
                 <button class="primary-btn" onclick="showMyQR()">QRコードを出す</button>
                 <button class="primary-btn" style="background-color:#5c6bc0;" onclick="startQRScan()">QRコードを読み取る</button>
                 
-                <!-- QRコードを出す -->
                 <div id="qr-display-area" class="qr-area">
                     <span style="font-size:12px; font-weight:bold; color:#555;"><span id="my-name-placeholder"></span> の友達追加QR</span>
                     <div id="qrcode" class="qr-box"></div>
-                    <p style="font-size:11px; color:#777; margin:5px 0 0 0;">相手に読み取ってもらってね！</p>
+                    <p style="font-size:11px; color:#777; margin:5px 0 0 0;">相手に読み取てもらってね！</p>
                     <button class="secondary-btn" style="margin-top:15px; font-size:11px; padding:5px;" onclick="simulatePartnerScanned()">【テスト】相手が読み取ってくれた！(例:妹)</button>
                 </div>
 
-                <!-- QRコードを読み取る -->
                 <div id="camera-scan-area" class="camera-area">
                     <div class="video-wrapper">
                         <video id="preview-video" playsinline></video>
@@ -357,14 +346,12 @@
                     </div>
                 </div>
                 
-                <!-- 登録エラー表示 -->
                 <div id="error-display-area" class="error-area">
                     <div class="error-box">
                         ⚠️ 読み取れませんでした。<br>もう一度試してください。
                     </div>
                 </div>
 
-                <!-- 登録成功表示 -->
                 <div id="success-display-area" class="success-area">
                     <div class="success-box">
                         🤝 <span id="success-friend-name"></span> と友達登録しました！
@@ -381,18 +368,16 @@
 <script>
     let registeredName = "";
     let friendList = []; 
-    let chatHistoryData = {}; // 【新機能】メッセージ履歴を保存するオブジェクト { '相手の名前': ['メッセージ1', 'メッセージ2'] }
+    let chatHistoryData = {}; 
     let activeChatFriend = ""; 
     let qrGenerator = null;
 
-    // カメラ制御用の変数
     let localStream = null;
     let videoElement = null;
     let canvasElement = null;
     let canvasContext = null;
     let scanAnimationId = null;
 
-    // ページ読み込み時に保存データをチェック
     window.onload = function() {
         const savedName = localStorage.getItem("rakuraku_username");
         const savedFriends = localStorage.getItem("rakuraku_friends");
@@ -405,7 +390,6 @@
             if (savedFriends) {
                 friendList = JSON.parse(savedFriends);
             }
-            // 【メッセージ履歴の復元】
             if (savedChats) {
                 chatHistoryData = JSON.parse(savedChats);
             }
@@ -415,7 +399,6 @@
         }
     };
 
-    // 画面切り替え
     function changeScreen(screenId) {
         document.querySelectorAll('.app-screen').forEach(screen => {
             screen.classList.remove('active');
@@ -423,7 +406,6 @@
         document.getElementById(screenId).classList.add('active');
     }
 
-    // 名前登録
     function submitName() {
         const nameInput = document.getElementById('username-input').value.trim();
         if (nameInput === "") {
@@ -442,12 +424,10 @@
         localStorage.setItem("rakuraku_friends", JSON.stringify(friendList));
     }
 
-    // 【新機能】メッセージ履歴をローカルストレージに保存する関数
     function saveChatsToStorage() {
         localStorage.setItem("rakuraku_chats", JSON.stringify(chatHistoryData));
     }
 
-    // 友達メニューの開閉
     function toggleFriendSection() {
         const section = document.getElementById('friend-section');
         if (section.style.display === "none") {
@@ -458,7 +438,6 @@
         }
     }
 
-    // 友達リストの画面表示
     function updateFriendListUI() {
         const listBox = document.getElementById('friend-list-box');
         listBox.innerHTML = ""; 
@@ -482,17 +461,14 @@
         });
     }
 
-    // 【アップデート】友達をタップした時にメッセージ履歴＋入力枠を作る
     function openChat(friendName) {
         activeChatFriend = friendName;
         const placement = document.getElementById('dynamic-chat-placement');
         
-        // 該当する友達の過去メッセージがあるか確認、なければ空のリストを作る
         if (!chatHistoryData[friendName]) {
             chatHistoryData[friendName] = [];
         }
 
-        // 過去のメッセージの泡（バブル）を組み立てる
         let bubblesHtml = "";
         if (chatHistoryData[friendName].length === 0) {
             bubblesHtml = `<div class="chat-no-message">まだメッセージの履歴はありません</div>`;
@@ -505,26 +481,21 @@
         placement.innerHTML = `
             <div class="dynamic-chat-container">
                 <div style="font-weight:bold; font-size:12px; margin-bottom:5px; color:#555;">💬 ${friendName} とのトーク履歴</div>
-                
-                <!-- メッセージ履歴表示エリア -->
                 <div class="chat-history" id="chat-history-box">
                     ${bubblesHtml}
                 </div>
-
                 <textarea id="chat-input" class="text-input" style="text-align:left; min-height:50px; margin-bottom:8px; font-size:13px;" placeholder="メッセージを入力"></textarea>
                 <button class="primary-btn" style="margin:0; padding:6px; font-size:12px; width:80px; float:right;" onclick="sendMessage()">送信</button>
                 <div style="clear:both;"></div>
             </div>
         `;
         
-        // 履歴ボックスを一番下までスクロールさせる
         const historyBox = document.getElementById('chat-history-box');
         historyBox.scrollTop = historyBox.scrollHeight;
 
         document.getElementById('chat-input').focus();
     }
 
-    // 【アップデート】メッセージ送信処理（履歴データに保存する仕組みを追加）
     function sendMessage() {
         const chatInput = document.getElementById('chat-input');
         const text = chatInput.value.trim();
@@ -533,21 +504,16 @@
             return; 
         }
         
-        // 配列に新しいメッセージを追加して保存
         if (!chatHistoryData[activeChatFriend]) {
             chatHistoryData[activeChatFriend] = [];
         }
         chatHistoryData[activeChatFriend].push(text);
-        saveChatsToStorage(); // 端末に記憶
+        saveChatsToStorage();
 
-        // 送信通知アラート（動作シミュレーション用）
         alert(activeChatFriend + " へメッセージを送信しました！\n\n内容：「" + text + "」");
-        
-        // 画面のチャットエリアを再描画して、送信した内容を即座に履歴に反映させる
         openChat(activeChatFriend);
     }
 
-    // 新規登録画面を開く
     function openNewRegister() {
         stopCamera();
         document.getElementById('qr-display-area').style.display = "none";
@@ -567,7 +533,6 @@
         backToMain();
     }
 
-    // 自分のQRコード生成・表示
     function showMyQR() {
         stopCamera();
         document.getElementById('camera-scan-area').style.display = "none";
@@ -589,7 +554,6 @@
         document.getElementById('qr-display-area').style.display = "block";
     }
 
-    // デバイスの本当のカメラを起動させる処理
     function startQRScan() {
         document.getElementById('qr-display-area').style.display = "none";
         document.getElementById('error-display-area').style.display = "none";
@@ -619,6 +583,7 @@
             });
     }
 
+    // 【完全デバッグ】QRコードのデータを何でも受け付けるように制限を解除
     function tickScan() {
         if (videoElement && videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
             canvasElement.height = videoElement.videoHeight;
@@ -631,11 +596,22 @@
             });
 
             if (code) {
-                const qrText = code.data;
-                if (qrText.startsWith("okasan-app-user:")) {
-                    const matchedName = qrText.replace("okasan-app-user:", "");
+                let qrText = code.data.trim();
+                if (qrText !== "") {
                     stopCamera();
-                    addFriendDirect(matchedName);
+                    
+                    // もしアプリ独自のプレフィックスがついていたら外す
+                    if (qrText.startsWith("okasan-app-user:")) {
+                        qrText = qrText.replace("okasan-app-user:", "");
+                    }
+                    
+                    // URLなどの長い文字列だった場合は、見やすいように先頭の15文字だけを切り出す
+                    if (qrText.length > 15) {
+                        qrText = qrText.substring(0, 15) + "...";
+                    }
+
+                    // 友達追加の処理へ進む
+                    addFriendDirect(qrText);
                     return;
                 }
             }
@@ -659,7 +635,6 @@
         }
     }
 
-    // 解析成功時に友達リストへ追加する処理
     function addFriendDirect(newFriendName) {
         document.getElementById('camera-scan-area').style.display = "none";
         if (!friendList.includes(newFriendName)) {
@@ -671,7 +646,6 @@
         document.getElementById('success-display-area').style.display = "block";
     }
 
-    // テスト用の疑似ボタン処理
     function simulatePartnerScanned() {
         document.getElementById('qr-display-area').style.display = "none";
         const partnerName = "妹"; 
@@ -684,7 +658,6 @@
         document.getElementById('success-display-area').style.display = "block";
     }
 
-    // 保存データを一度全部まっさらにして最初からやり直す関数
     function clearAllData() {
         if (confirm("名前、友達、メッセージ履歴を含むすべての保存データを消去して、初期状態に戻しますか？")) {
             localStorage.clear();
