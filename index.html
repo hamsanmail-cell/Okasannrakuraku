@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お母さんラクラク アプリ 水色版</title>
+    <title>お母さんラクラク アプリ カメラ完全実装版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -12,7 +14,6 @@
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             line-height: 1.6;
             color: #333333;
-            /* 背景を淡い水色系に調整 */
             background-color: #f2f8fc;
             margin: 0;
             padding: 0;
@@ -23,7 +24,6 @@
             padding: 20px;
         }
         header {
-            /* ヘッダーを爽やかな水色に変更 */
             background-color: #64b5f6;
             color: white;
             padding: 15px;
@@ -48,7 +48,6 @@
             min-height: 520px;
         }
         .phone-header {
-            /* アプリ内のヘッダーも水色に統一 */
             background-color: #64b5f6;
             color: white;
             padding: 12px;
@@ -62,7 +61,6 @@
             right: 10px;
             top: 8px;
             background-color: white;
-            /* 文字色を水色に */
             color: #64b5f6;
             border: none;
             padding: 4px 8px;
@@ -107,7 +105,6 @@
             font-size: 14px;
         }
         .primary-btn {
-            /* メインのボタンも鮮やかな水色に変更 */
             background-color: #64b5f6;
             color: white;
             border: none;
@@ -154,7 +151,6 @@
             align-items: center;
         }
         .friend-item:hover {
-            /* ホバー時の色を薄い水色に */
             background-color: #e3f2fd;
         }
         .friend-item::after {
@@ -179,7 +175,7 @@
             margin-bottom: 15px;
         }
         
-        /* QRコードエリア */
+        /* QRコード・カメラエリア */
         .qr-area, .camera-area, .error-area, .success-area {
             display: none;
             margin-top: 15px;
@@ -190,11 +186,28 @@
             text-align: center;
         }
         .qr-box {
-            width: 100px;
-            height: 100px;
-            margin: 10px auto;
-            border: 4px solid #333;
-            background: repeating-conic-gradient(#333 0% 25%, transparent 0% 50%) 50% / 14px 14px;
+            width: 128px;
+            height: 128px;
+            margin: 15px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 【カメラ映像の描画エリア】 */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: #333;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        #preview-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
         /* 警告・成功ボックス */
@@ -249,7 +262,7 @@
                 <label class="input-label">名前を入力してね</label>
                 <input type="text" id="username-input" class="text-input" placeholder="例：お母さん">
                 <button class="primary-btn" onclick="submitName()">決定</button>
-                <p class="hint-text">※名前を入力して「決定」を押すと進みます</p>
+                <p class="hint-text">※名前を入力して「決定」を押すと進めます</p>
             </div>
         </div>
 
@@ -278,7 +291,7 @@
         <div id="screen-add-friend" class="app-screen">
             <div class="phone-header">
                 新規登録（友達追加）
-                <button class="right-btn" style="background:#666; color:white;" onclick="backToMain()">戻る</button>
+                <button class="right-btn" style="background:#666; color:white;" onclick="clickBackButton()">戻る</button>
             </div>
             <div class="phone-body">
                 <button class="primary-btn" onclick="showMyQR()">QRコードを出す</button>
@@ -286,18 +299,20 @@
                 
                 <div id="qr-display-area" class="qr-area">
                     <span style="font-size:12px; font-weight:bold; color:#555;"><span id="my-name-placeholder"></span> の友達追加QR</span>
-                    <div class="qr-box"></div>
+                    <div id="qrcode" class="qr-box"></div>
                     <p style="font-size:11px; color:#777; margin:5px 0 0 0;">相手に読み取ってもらってね！</p>
                     <button class="secondary-btn" style="margin-top:15px; font-size:11px; padding:5px;" onclick="simulatePartnerScanned()">【テスト】相手が読み取ってくれた！(例:妹)</button>
                 </div>
 
                 <div id="camera-scan-area" class="camera-area">
-                    <div style="background:#333; color:#fff; height:100px; line-height:100px; border-radius:6px; font-size:12px;">
-                        📷 カメラモード（スキャン中...）
+                    <div class="video-wrapper">
+                        <video id="preview-video" playsinline></video>
                     </div>
-                    <div style="margin-top:10px; display:flex; gap:5px;">
-                        <button class="secondary-btn" style="flex:1; margin:0; font-size:11px;" onclick="simulateScanSuccess('お兄ちゃん')">成功 (例:お兄ちゃん)</button>
-                        <button class="secondary-btn" style="flex:1; margin:0; font-size:11px; background:#ffebee; color:#c62828;" onclick="simulateScanFail()">失敗（エラーを出す）</button>
+                    <div style="font-size:11px; color:#555; margin-bottom:5px;">枠内に友達のQRコードを映してね</div>
+                    <canvas id="hidden-canvas" style="display:none;"></canvas>
+                    
+                    <div style="margin-top:10px;">
+                        <button class="secondary-btn" style="margin:0; font-size:11px;" onclick="stopCamera()">カメラを止める</button>
                     </div>
                 </div>
                 
@@ -324,6 +339,14 @@
     let registeredName = "";
     let friendList = []; 
     let activeChatFriend = ""; 
+    let qrGenerator = null;
+
+    // カメラ制御用の変数
+    let localStream = null;
+    let videoElement = null;
+    let canvasElement = null;
+    let canvasContext = null;
+    let scanAnimationId = null;
 
     // 画面切り替え
     function changeScreen(screenId) {
@@ -381,7 +404,7 @@
         });
     }
 
-    // 友達をタップした時にメッセージ枠を作る
+    // メッセージ枠生成
     function openChat(friendName) {
         activeChatFriend = friendName;
         const placement = document.getElementById('dynamic-chat-placement');
@@ -402,18 +425,17 @@
     function sendMessage() {
         const chatInput = document.getElementById('chat-input');
         const text = chatInput.value.trim();
-        
         if (text === "") { 
             alert("用件を入力してから送信してください！");
             return; 
         }
-        
         alert(activeChatFriend + " へメッセージを送信しました！\n\n内容：「" + text + "」");
         document.getElementById('dynamic-chat-placement').innerHTML = "";
     }
 
     // 新規登録画面を開く
     function openNewRegister() {
+        stopCamera();
         document.getElementById('qr-display-area').style.display = "none";
         document.getElementById('camera-scan-area').style.display = "none";
         document.getElementById('error-display-area').style.display = "none";
@@ -422,48 +444,64 @@
     }
 
     function backToMain() {
+        stopCamera();
         changeScreen('screen-main');
     }
 
+    function clickBackButton() {
+        stopCamera();
+        backToMain();
+    }
+
+    // 自分のQRコード生成・表示
     function showMyQR() {
+        stopCamera();
         document.getElementById('camera-scan-area').style.display = "none";
         document.getElementById('error-display-area').style.display = "none";
         document.getElementById('success-display-area').style.display = "none";
+        
+        const qrBox = document.getElementById('qrcode');
+        qrBox.innerHTML = ""; 
+        
+        // 独自の識別用テキストをつけてQRを生成
+        qrGenerator = new QRCode(qrBox, {
+            text: "okasan-app-user:" + registeredName,
+            width: 128,
+            height: 128,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
         document.getElementById('qr-display-area').style.display = "block";
     }
 
+    // 【完全デバッグ】デバイスの本当のカメラを起動させる処理
     function startQRScan() {
         document.getElementById('qr-display-area').style.display = "none";
         document.getElementById('error-display-area').style.display = "none";
         document.getElementById('success-display-area').style.display = "none";
         document.getElementById('camera-scan-area').style.display = "block";
-    }
 
-    function simulateScanSuccess(newFriendName) {
-        document.getElementById('camera-scan-area').style.display = "none";
-        if (!friendList.includes(newFriendName)) {
-            friendList.push(newFriendName);
-        }
-        updateFriendListUI();
-        document.getElementById('success-friend-name').innerText = newFriendName;
-        document.getElementById('success-display-area').style.display = "block";
-    }
+        videoElement = document.getElementById('preview-video');
+        canvasElement = document.getElementById('hidden-canvas');
+        canvasContext = canvasElement.getContext('2d');
 
-    function simulateScanFail() {
-        document.getElementById('error-display-area').style.display = "block";
-    }
+        // スマホのアウトカメラ（背面レンズ）を優先して起動をリクエスト
+        const constraints = {
+            video: { facingMode: "environment" }
+        };
 
-    function simulatePartnerScanned() {
-        document.getElementById('qr-display-area').style.display = "none";
-        const partnerName = "妹"; 
-        if (!friendList.includes(partnerName)) {
-            friendList.push(partnerName);
-        }
-        updateFriendListUI();
-        document.getElementById('success-friend-name').innerText = partnerName;
-        document.getElementById('success-display-area').style.display = "block";
-    }
-</script>
-
-</body>
-</html>
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(function(stream) {
+                localStream = stream;
+                videoElement.srcObject = stream;
+                videoElement.setAttribute("playsinline", true); // iOS(Safari)対策
+                videoElement.play();
+                // 映像コマを解析してQRコードを探すループを開始
+                scanAnimationId = requestAnimationFrame(tickScan);
+            })
+            .catch(function(err) {
+                console.error("カメラの起動に失敗しました: ", err);
+                alert("カメラを起動できませんでした。ブラウザのカメラ許可設定を確認してください。");
+                document
