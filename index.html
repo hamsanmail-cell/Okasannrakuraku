@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お母さんラクラク アプリ スプレッドシート通信版</title>
+    <title>お母さんラクラク アプリ スプレッドシート通信版(修正版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
@@ -113,7 +113,7 @@
 </div>
 
 <script>
-    // 🔴【超重要】ここにステップ3で取得した「ウェブアプリのURL」を貼り付けてください！
+    // 🔴【重要】ここにスプレッドシート(GAS)の「ウェブアプリURL」を貼り付けてください！
     const GAS_URL = https://script.google.com/macros/s/AKfycbx3Zf0t_A5A7s_MV2O2rWkNu2NUEZjpfjSWUX9lh4iV7bag5LruqolicVqLulz28_UdBw/exec;
 
     let registeredName = "";
@@ -144,7 +144,6 @@
         document.querySelectorAll('.app-screen').forEach(screen => screen.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
         
-        // チャット画面以外のときは自動更新を止める
         if (screenId !== 'screen-main' || !activeChatFriend) {
             if (refreshIntervalId) { clearInterval(refreshIntervalId); refreshIntervalId = null; }
         }
@@ -184,11 +183,9 @@
         });
     }
 
-    // スプレッドシートからメッセージを読み込んで表示する
     function openChat(friendName) {
         activeChatFriend = friendName;
         
-        // 3秒ごとに自動でスプレッドシートを見に行って最新メッセージに更新する
         if (refreshIntervalId) clearInterval(refreshIntervalId);
         fetchMessages(); 
         refreshIntervalId = setInterval(fetchMessages, 3000);
@@ -207,7 +204,6 @@
         `;
     }
 
-    // スプレッドシートから電波でメッセージをもらう処理
     function fetchMessages() {
         if (!GAS_URL || GAS_URL.startsWith("ここに")) return;
 
@@ -217,7 +213,6 @@
             const historyBox = document.getElementById('chat-history-box');
             if (!historyBox) return;
 
-            // 自分と相手に関係するメッセージだけを絞り込む
             const filtered = data.filter(msg => 
                 (msg.sender === registeredName && msg.receiver === activeChatFriend) ||
                 (msg.sender === activeChatFriend && msg.receiver === registeredName)
@@ -243,12 +238,11 @@
             });
 
             historyBox.innerHTML = html;
-            historyBox.scrollTop = historyBox.scrollHeight; // 自動スクロール
+            historyBox.scrollTop = historyBox.scrollHeight;
         })
         .catch(err => console.error("受信失敗:", err));
     }
 
-    // スプレッドシートへ電波でメッセージを飛ばす処理
     function sendMessage() {
         const chatInput = document.getElementById('chat-input');
         const text = chatInput.value.trim();
@@ -263,14 +257,13 @@
 
         fetch(GAS_URL, {
             method: "POST",
-            method: "POST",
             body: JSON.stringify(payload)
         })
         .then(res => res.json())
         .then(resData => {
             if(resData.status === "success") {
                 chatInput.value = "";
-                fetchMessages(); // すぐに再描画
+                fetchMessages();
             } else {
                 alert("送信に失敗しました");
             }
