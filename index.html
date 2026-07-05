@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お母さんラクラク アプリ 画面クリーンアップ版</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #fcf8f2;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #ff8e91;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+        
+        /* スマホ画面風コンテナ */
+        .phone-mockup {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            border: 8px solid #444;
+            overflow: hidden;
+            position: relative;
+            min-height: 520px;
+        }
+        .phone-header {
+            background-color: #ff8e91;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+            font-size: 14px;
+        }
+        .phone-header .right-btn {
+            position: absolute;
+            right: 10px;
+            top: 8px;
+            background-color: white;
+            color: #ff8e91;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .phone-body {
+            padding: 15px;
+            min-height: 460px;
+            position: relative;
+            background-color: #f9f9f9;
+        }
+        
+        /* 画面切り替え */
+        .app-screen {
+            display: none;
+        }
+        .app-screen.active {
+            display: block;
+        }
+        
+        /* 入力フォーム・ボタン */
+        .input-label {
+            display: block;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+        .text-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            outline: none;
+            text-align: center;
+            font-size: 14px;
+        }
+        .primary-btn {
+            background-color: #ff8e91;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            margin-bottom: 12px;
+            display: block;
+            font-size: 14px;
+        }
+        .primary-btn:active {
+            opacity: 0.8;
+        }
+        .secondary-btn {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 13px;
+        }
+        
+        /* 友達アイテム */
+        .friend-item {
+            background: #fdfdfd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #eaeaea;
+            cursor: pointer;
+            font-weight: bold;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .friend-item:hover {
+            background-color: #fff0f1;
+        }
+        .friend-item::after {
+            content: "💬 送信する";
+            font-size: 10px;
+            color: #ff8e91;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid #ff8e91;
+        }
+
+        /* 友達ゼロの時のメッセージ */
+        .no-friends-box {
+            color: #888;
+            font-size: 12px;
+            text-align: center;
+            padding: 20px 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+            margin-bottom: 15px;
+        }
+        
+        /* QRコードエリア */
+        .qr-area, .camera-area, .error-area, .success-area {
+            display: none;
+            margin-top: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .qr-box {
+            width: 100px;
+            height: 100px;
+            margin: 10px auto;
+            border: 4px solid #333;
+            background: repeating-conic-gradient(#333 0% 25%, transparent 0% 50%) 50% / 14px 14px;
+        }
+        
+        /* 警告・成功ボックス */
+        .error-box {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #ffcdd2;
+        }
+        .success-box {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #c8e6c9;
+        }
+
+        /* 動的に作られるチャット枠の見た目 */
+        .dynamic-chat-container {
+            background-color: #eaeaea;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 15px;
+            border: 1px solid #ccc;
+        }
+        
+        .hint-text {
+            font-size: 11px;
+            color: #777;
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>「お母さんラクラク」動作確認用</h1>
+    </header>
+
+    <div class="phone-mockup">
+        
+        <div id="screen-register" class="app-screen active">
+            <div class="phone-header">お母さんラクラク</div>
+            <div class="phone-body">
+                <label class="input-label">名前を入力してね</label>
+                <input type="text" id="username-input" class="text-input" placeholder="例：お母さん">
+                <button class="primary-btn" onclick="submitName()">決定</button>
+                <p class="hint-text">※名前を入力して「決定」を押すと進みます</p>
+            </div>
+        </div>
+
+        <div id="screen-main" class="app-screen">
+            <div class="phone-header">
+                ホーム
+                <button class="right-btn" onclick="toggleFriendSection()">友達</button>
+            </div>
+            <div class="phone-body">
+                <div id="friend-section" style="display:none; margin-top:20px; border-top:2px dashed #ff8e91; padding-top:15px;">
+                    <span style="font-weight:bold; color:#d15b5f; font-size:13px;">【友達リスト】</span>
+                    <p style="font-size:11px; color:#666; margin: 0 0 10px 0;">名前を押すとメッセージ送信欄が開きます</p>
+                    
+                    <div id="friend-list-box"></div>
+
+                    <div id="dynamic-chat-placement"></div>
+
+                    <div style="margin-top:20px;">
+                        <button class="secondary-btn" onclick="openNewRegister()">+ 新規登録</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-add-friend" class="app-screen">
+            <div class="phone-header">
+                新規登録（友達追加）
+                <button class="right-btn" style="background:#666; color:white;" onclick="backToMain()">戻る</button>
+            </div>
+            <div class="phone-body">
+                <button class="primary-btn" onclick="showMyQR()">QRコードを出す</button>
+                <button class="primary-btn" style="background-color:#5c6bc0;" onclick="startQRScan()">QRコードを読み取る</button>
+                
+                <div id="qr-display-area" class="qr-area">
+                    <span style="font-size:12px; font-weight:bold; color:#555;"><span id="my-name-placeholder"></span> の友達追加QR</span>
+                    <div class="qr-box"></div>
+                    <p style="font-size:11px; color:#777; margin:5px 0 0 0;">相手に読み取ってもらってね！</p>
+                    <button class="secondary-btn" style="margin-top:15px; font-size:11px; padding:5px;" onclick="simulatePartnerScanned()">【テスト】相手が読み取ってくれた！(例:妹)</button>
+                </div>
+
+                <div id="camera-scan-area" class="camera-area">
+                    <div style="background:#333; color:#fff; height:100px; line-height:100px; border-radius:6px; font-size:12px;">
+                        📷 カメラモード（スキャン中...）
+                    </div>
+                    <div style="margin-top:10px; display:flex; gap:5px;">
+                        <button class="secondary-btn" style="flex:1; margin:0; font-size:11px;" onclick="simulateScanSuccess('お兄ちゃん')">成功 (例:お兄ちゃん)</button>
+                        <button class="secondary-btn" style="flex:1; margin:0; font-size:11px; background:#ffebee; color:#c62828;" onclick="simulateScanFail()">失敗（エラーを出す）</button>
+                    </div>
+                </div>
+                
+                <div id="error-display-area" class="error-area">
+                    <div class="error-box">
+                        ⚠️ 読み取れませんでした。<br>もう一度試してください。
+                    </div>
+                </div>
+
+                <div id="success-display-area" class="success-area">
+                    <div class="success-box">
+                        🤝 <span id="success-friend-name"></span> と友達登録しました！
+                    </div>
+                    <button class="primary-btn" style="margin-top:10px; font-size:12px; padding:8px;" onclick="backToMain()">友達リストに戻る</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let registeredName = "";
+    let friendList = []; 
+    let activeChatFriend = ""; 
+
+    // 画面切り替え
+    function changeScreen(screenId) {
+        document.querySelectorAll('.app-screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    // 名前登録
+    function submitName() {
+        const nameInput = document.getElementById('username-input').value.trim();
+        if (nameInput === "") {
+            alert("お名前を入力してね！");
+            return;
+        }
+        registeredName = nameInput;
+        document.getElementById('my-name-placeholder').innerText = registeredName;
+        changeScreen('screen-main');
+        updateFriendListUI();
+    }
+
+    // 友達メニューの開閉
+    function toggleFriendSection() {
+        const section = document.getElementById('friend-section');
+        if (section.style.display === "none") {
+            section.style.display = "block";
+            document.getElementById('dynamic-chat-placement').innerHTML = "";
+        } else {
+            section.style.display = "none";
+        }
+    }
+
+    // 友達リストの画面表示
+    function updateFriendListUI() {
+        const listBox = document.getElementById('friend-list-box');
+        listBox.innerHTML = ""; 
+        
+        if (friendList.length === 0) {
+            const noFriends = document.createElement('div');
+            noFriends.className = "no-friends-box";
+            noFriends.innerText = "まだ友達が登録されていません。\n下の「新規登録」から追加してください。";
+            listBox.appendChild(noFriends);
+            
+            document.getElementById('dynamic-chat-placement').innerHTML = "";
+            return;
+        }
+        
+        friendList.forEach(friend => {
+            const div = document.createElement('div');
+            div.className = "friend-item";
+            div.innerText = "👤 " + friend;
+            div.onclick = function() { openChat(friend); };
+            listBox.appendChild(div);
+        });
+    }
+
+    // 友達をタップした時にメッセージ枠を作る
+    function openChat(friendName) {
+        activeChatFriend = friendName;
+        const placement = document.getElementById('dynamic-chat-placement');
+        
+        placement.innerHTML = `
+            <div class="dynamic-chat-container">
+                <div style="font-weight:bold; font-size:12px; margin-bottom:8px; color:#555;">💬 ${friendName} へのメッセージ</div>
+                <textarea id="chat-input" class="text-input" style="text-align:left; min-height:60px; margin-bottom:8px;" placeholder="ここに用件を書いてください"></textarea>
+                <button class="primary-btn" style="margin:0; padding:6px; font-size:12px; width:80px; float:right;" onclick="sendMessage()">送信</button>
+                <div style="clear:both;"></div>
+            </div>
+        `;
+        
+        document.getElementById('chat-input').focus();
+    }
+
+    // メッセージ送信処理
+    function sendMessage() {
+        const chatInput = document.getElementById('chat-input');
+        const text = chatInput.value.trim();
+        
+        if (text === "") { 
+            alert("用件を入力してから送信してください！");
+            return; 
+        }
+        
+        alert(activeChatFriend + " へメッセージを送信しました！\n\n内容：「" + text + "」");
+        document.getElementById('dynamic-chat-placement').innerHTML = "";
+    }
+
+    // 新規登録画面を開く
+    function openNewRegister() {
+        document.getElementById('qr-display-area').style.display = "none";
+        document.getElementById('camera-scan-area').style.display = "none";
+        document.getElementById('error-display-area').style.display = "none";
+        document.getElementById('success-display-area').style.display = "none";
+        changeScreen('screen-add-friend');
+    }
+
+    function backToMain() {
+        changeScreen('screen-main');
+    }
+
+    function showMyQR() {
+        document.getElementById('camera-scan-area').style.display = "none";
+        document.getElementById('error-display-area').style.display = "none";
+        document.getElementById('success-display-area').style.display = "none";
+        document.getElementById('qr-display-area').style.display = "block";
+    }
+
+    function startQRScan() {
+        document.getElementById('qr-display-area').style.display = "none";
+        document.getElementById('error-display-area').style.display = "none";
+        document.getElementById('success-display-area').style.display = "none";
+        document.getElementById('camera-scan-area').style.display = "block";
+    }
+
+    function simulateScanSuccess(newFriendName) {
+        document.getElementById('camera-scan-area').style.display = "none";
+        if (!friendList.includes(newFriendName)) {
+            friendList.push(newFriendName);
+        }
+        updateFriendListUI();
+        document.getElementById('success-friend-name').innerText = newFriendName;
+        document.getElementById('success-display-area').style.display = "block";
+    }
+
+    function simulateScanFail() {
+        document.getElementById('error-display-area').style.display = "block";
+    }
+
+    function simulatePartnerScanned() {
+        document.getElementById('qr-display-area').style.display = "none";
+        const partnerName = "妹"; 
+        if (!friendList.includes(partnerName)) {
+            friendList.push(partnerName);
+        }
+        updateFriendListUI();
+        document.getElementById('success-friend-name').innerText = partnerName;
+        document.getElementById('success-display-area').style.display = "block";
+    }
+</script>
+
+</body>
+</html>
